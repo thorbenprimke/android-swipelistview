@@ -61,4 +61,7 @@ public class BaseSwipeListViewListener implements SwipeListViewListener {
     @Override
     public void onLastListItem() {
     }
+
+    @Override
+    public void onScrollStateChanged(int scrollState) { }
 }

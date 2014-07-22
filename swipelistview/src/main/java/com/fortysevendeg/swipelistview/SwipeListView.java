@@ -521,6 +521,12 @@ public class SwipeListView extends ListView {
         return SWIPE_MODE_DEFAULT;
     }
 
+    protected void onScrollStateChanged(int scrollState) {
+      if (swipeListViewListener != null) {
+        swipeListViewListener.onScrollStateChanged(scrollState);
+      }
+    }
+
     /**
      * Sets the Listener
      *

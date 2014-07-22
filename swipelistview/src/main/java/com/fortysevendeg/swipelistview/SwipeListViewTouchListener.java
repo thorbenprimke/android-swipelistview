@@ -657,6 +657,7 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
 
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
+                swipeListView.onScrollStateChanged(scrollState);
                 setEnabled(scrollState != AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                 if (swipeClosesAllItemsWhenListMoves && scrollState == SCROLL_STATE_TOUCH_SCROLL) {
                     closeOpenedItems();

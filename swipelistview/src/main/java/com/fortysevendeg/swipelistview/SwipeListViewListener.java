@@ -117,4 +117,9 @@ public interface SwipeListViewListener {
      */
     void onLastListItem();
 
+    /**
+     * Notifies that the {@link android.widget.ListView}'s scrollState has changed
+     * @param scrollState the new scrollState value
+     */
+    void onScrollStateChanged(int scrollState);
 }
