@@ -527,6 +527,12 @@ public class SwipeListView extends ListView {
       }
     }
 
+    protected void onOpenCloseAborted(int position) {
+      if (swipeListViewListener != null) {
+        swipeListViewListener.onOpenCloseAborted(position);
+      }
+    }
+
     /**
      * Sets the Listener
      *
@@ -706,5 +712,4 @@ public class SwipeListView extends ListView {
     public void closeOpenedItems() {
         touchListener.closeOpenedItems();
     }
-
 }

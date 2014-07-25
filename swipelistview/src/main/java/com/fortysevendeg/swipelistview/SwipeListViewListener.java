@@ -122,4 +122,10 @@ public interface SwipeListViewListener {
      * @param scrollState the new scrollState value
      */
     void onScrollStateChanged(int scrollState);
+
+    /**
+     * Notifies that the open or close action was aborted.
+     * @param position
+     */
+    void onOpenCloseAborted(int position);
 }

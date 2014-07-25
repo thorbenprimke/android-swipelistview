@@ -616,6 +616,8 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
                             } else {
                                 swipeListView.onClosed(position, openedRight.get(position));
                             }
+                        } else {
+                          swipeListView.onOpenCloseAborted(position);
                         }
                         resetCell();
                     }
