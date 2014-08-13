@@ -42,6 +42,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static android.widget.AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
+import static android.widget.AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
 import static com.nineoldandroids.view.ViewHelper.setAlpha;
 import static com.nineoldandroids.view.ViewHelper.setTranslationX;
 import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
@@ -103,6 +105,9 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
     private List<Boolean> checked = new ArrayList<Boolean>();
     private int oldSwipeActionRight;
     private int oldSwipeActionLeft;
+
+    private AbsListView.OnScrollListener scrollListener;
+    private int lastScrollState = SCROLL_STATE_IDLE;
 
     /**
      * Constructor
@@ -651,63 +656,68 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
      *
      * @return OnScrollListener
      */
-    public AbsListView.OnScrollListener makeScrollListener() {
-        return new AbsListView.OnScrollListener() {
+    public AbsListView.OnScrollListener maybeMakeAndGetScrollListener() {
+        if (scrollListener == null) {
+        scrollListener = new AbsListView.OnScrollListener() {
 
-            private boolean isFirstItem = false;
-            private boolean isLastItem = false;
+          private boolean isFirstItem = false;
+          private boolean isLastItem = false;
 
-            @Override
-            public void onScrollStateChanged(AbsListView absListView, int scrollState) {
-                swipeListView.onScrollStateChanged(scrollState);
-                setEnabled(scrollState != AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
-                if (swipeClosesAllItemsWhenListMoves && scrollState == SCROLL_STATE_TOUCH_SCROLL) {
-                    closeOpenedItems();
-                }
-                if (scrollState == SCROLL_STATE_TOUCH_SCROLL) {
-                    listViewMoving = true;
-                    setEnabled(false);
-                }
-                if (scrollState != AbsListView.OnScrollListener.SCROLL_STATE_FLING && scrollState != SCROLL_STATE_TOUCH_SCROLL) {
-                    listViewMoving = false;
-                    downPosition = ListView.INVALID_POSITION;
-                    swipeListView.resetScrolling();
-                    new Handler().postDelayed(new Runnable() {
-                        public void run() {
-                            setEnabled(true);
-                        }
-                    }, 500);
-                }
+          @Override
+          public void onScrollStateChanged(AbsListView absListView, int scrollState) {
+            lastScrollState = scrollState;
+            swipeListView.onScrollStateChanged(scrollState);
+
+            setEnabled(scrollState != AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
+            if (swipeClosesAllItemsWhenListMoves && scrollState == SCROLL_STATE_TOUCH_SCROLL) {
+              closeOpenedItems();
             }
+            if (scrollState == SCROLL_STATE_TOUCH_SCROLL) {
+              listViewMoving = true;
+              setEnabled(false);
+            }
+            if (scrollState != AbsListView.OnScrollListener.SCROLL_STATE_FLING && scrollState != SCROLL_STATE_TOUCH_SCROLL) {
+              listViewMoving = false;
+              downPosition = ListView.INVALID_POSITION;
+              swipeListView.resetScrolling();
+              new Handler().postDelayed(new Runnable() {
+                public void run() {
+                  setEnabled(true);
+                }
+              }, 500);
+            }
+          }
 
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (isFirstItem) {
-                    boolean onSecondItemList = firstVisibleItem == 1;
-                    if (onSecondItemList) {
-                        isFirstItem = false;
-                    }
-                } else {
-                    boolean onFirstItemList = firstVisibleItem == 0;
-                    if (onFirstItemList) {
-                        isFirstItem = true;
-                        swipeListView.onFirstListItem();
-                    }
-                }
-                if (isLastItem) {
-                    boolean onBeforeLastItemList = firstVisibleItem + visibleItemCount == totalItemCount - 1;
-                    if (onBeforeLastItemList) {
-                        isLastItem = false;
-                    }
-                } else {
-                    boolean onLastItemList = firstVisibleItem + visibleItemCount >= totalItemCount;
-                    if (onLastItemList) {
-                        isLastItem = true;
-                        swipeListView.onLastListItem();
-                    }
-                }
+          @Override
+          public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+              if (isFirstItem) {
+                  boolean onSecondItemList = firstVisibleItem == 1;
+                  if (onSecondItemList) {
+                      isFirstItem = false;
+                  }
+              } else {
+                  boolean onFirstItemList = firstVisibleItem == 0;
+                  if (onFirstItemList) {
+                      isFirstItem = true;
+                      swipeListView.onFirstListItem();
+                  }
+              }
+              if (isLastItem) {
+                  boolean onBeforeLastItemList = firstVisibleItem + visibleItemCount == totalItemCount - 1;
+                  if (onBeforeLastItemList) {
+                      isLastItem = false;
+                  }
+              } else {
+                  boolean onLastItemList = firstVisibleItem + visibleItemCount >= totalItemCount;
+                  if (onLastItemList) {
+                      isLastItem = true;
+                      swipeListView.onLastListItem();
+                  }
+              }
             }
         };
+      }
+      return scrollListener;
     }
 
     /**
@@ -917,6 +927,18 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
                     return true;
                 }
                 break;
+            }
+
+            case MotionEvent.ACTION_CANCEL: {
+              if (lastScrollState == SCROLL_STATE_TOUCH_SCROLL &&
+                  swipeListView.getFirstVisiblePosition() == 0 &&
+                  swipeListView.getChildCount() > 0 &&
+                  swipeListView.getChildAt(0).getTop() == 0) {
+                if (scrollListener != null) {
+                  scrollListener.onScrollStateChanged(swipeListView, SCROLL_STATE_IDLE);
+                }
+              }
+              break;
             }
         }
         return false;

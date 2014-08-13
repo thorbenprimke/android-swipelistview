@@ -229,7 +229,7 @@ public class SwipeListView extends ListView {
         touchListener.setSwipeDrawableChecked(swipeDrawableChecked);
         touchListener.setSwipeDrawableUnchecked(swipeDrawableUnchecked);
         setOnTouchListener(touchListener);
-        setOnScrollListener(touchListener.makeScrollListener());
+        setOnScrollListener(touchListener.maybeMakeAndGetScrollListener());
     }
 
     /**
