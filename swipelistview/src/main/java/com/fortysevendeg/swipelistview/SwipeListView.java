@@ -104,6 +104,16 @@ public class SwipeListView extends ListView {
     public final static String SWIPE_DEFAULT_BACK_VIEW = "swipelist_backview";
 
     /**
+     * Moves the frontView off screen to reveal the backView.
+     */
+    public final static int SWIPE_ACTION_MODE_MOVE = 0;
+
+    /**
+     * Moves the backView over the frontView.
+     */
+    public final static int SWIPE_ACTION_MODE_OVER = 1;
+
+    /**
      * Indicates no movement
      */
     private final static int TOUCH_STATE_REST = 0;
@@ -186,6 +196,7 @@ public class SwipeListView extends ListView {
 
         int swipeActionLeft = SWIPE_ACTION_REVEAL;
         int swipeActionRight = SWIPE_ACTION_REVEAL;
+        int swipeActionMode = SWIPE_ACTION_MODE_MOVE;
 
         if (attrs != null) {
             TypedArray styled = getContext().obtainStyledAttributes(attrs, R.styleable.SwipeListView);
@@ -201,6 +212,7 @@ public class SwipeListView extends ListView {
             swipeDrawableUnchecked = styled.getResourceId(R.styleable.SwipeListView_swipeDrawableUnchecked, 0);
             swipeFrontView = styled.getResourceId(R.styleable.SwipeListView_swipeFrontView, 0);
             swipeBackView = styled.getResourceId(R.styleable.SwipeListView_swipeBackView, 0);
+            swipeActionMode = styled.getResourceId(R.styleable.SwipeListView_swipeActionMode, SWIPE_ACTION_MODE_MOVE);
             styled.recycle();
         }
 
@@ -228,6 +240,7 @@ public class SwipeListView extends ListView {
         touchListener.setSwipeOpenOnLongPress(swipeOpenOnLongPress);
         touchListener.setSwipeDrawableChecked(swipeDrawableChecked);
         touchListener.setSwipeDrawableUnchecked(swipeDrawableUnchecked);
+        touchListener.setSwipeActionMode(swipeActionMode);
         setOnTouchListener(touchListener);
         setOnScrollListener(touchListener.maybeMakeAndGetScrollListener());
     }

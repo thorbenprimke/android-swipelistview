@@ -44,6 +44,8 @@ import java.util.List;
 
 import static android.widget.AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
 import static android.widget.AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
+import static com.fortysevendeg.swipelistview.SwipeListView.SWIPE_ACTION_MODE_MOVE;
+import static com.fortysevendeg.swipelistview.SwipeListView.SWIPE_ACTION_MODE_OVER;
 import static com.nineoldandroids.view.ViewHelper.setAlpha;
 import static com.nineoldandroids.view.ViewHelper.setTranslationX;
 import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
@@ -98,6 +100,7 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
 
     private int swipeActionLeft = SwipeListView.SWIPE_ACTION_REVEAL;
     private int swipeActionRight = SwipeListView.SWIPE_ACTION_REVEAL;
+    private int swipeActionMode = SWIPE_ACTION_MODE_MOVE;
 
     private List<Boolean> opened = new ArrayList<Boolean>();
     private List<Boolean> openedRight = new ArrayList<Boolean>();
@@ -286,6 +289,14 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
      */
     public void setSwipeActionRight(int swipeActionRight) {
         this.swipeActionRight = swipeActionRight;
+    }
+
+    public int getSwipeActionMode() {
+        return swipeActionMode;
+    }
+
+    public void setSwipeActionMode(int swipeActionMode) {
+        this.swipeActionMode = swipeActionMode;
     }
 
     /**
@@ -596,13 +607,23 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
     private void generateRevealAnimate(final View view, final boolean swap, final boolean swapRight, final int position) {
         int moveTo = 0;
         if (opened.get(position)) {
+          if (swipeActionMode == SWIPE_ACTION_MODE_MOVE) {
             if (!swap) {
                 moveTo = openedRight.get(position) ? (int) (viewWidth - rightOffset) : (int) (-viewWidth + leftOffset);
             }
-        } else {
+          } else {
             if (swap) {
-                moveTo = swapRight ? (int) (viewWidth - rightOffset) : (int) (-viewWidth + leftOffset);
+                moveTo = -viewWidth;
             }
+          }
+        } else {
+          if (swap) {
+            if (swipeActionMode == SWIPE_ACTION_MODE_MOVE) {
+                moveTo = swapRight ? (int) (viewWidth - rightOffset) : (int) (-viewWidth + leftOffset);
+            } else {
+                moveTo = swapRight ? (int) 0 : (int) (-viewWidth + leftOffset);
+            }
+          }
         }
 
         animate(view)
@@ -785,6 +806,12 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
                         velocityTracker.addMovement(motionEvent);
                         if (swipeBackView > 0) {
                             setBackView(child.findViewById(swipeBackView));
+                            if (backView.getVisibility() == View.GONE) {
+                              backView.setVisibility(View.VISIBLE);
+                            }
+                            if (swipeActionMode == SWIPE_ACTION_MODE_OVER) {
+                              setTranslationX(backView, -viewWidth);
+                            }
                         }
                         break;
                     }
@@ -833,7 +860,7 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
                 }
 
 
-                generateAnimate(frontView, swap, swapRight, downPosition);
+                generateAnimate(getViewForSwipeActionMode(), swap, swapRight, downPosition);
                 if (swipeCurrentAction == SwipeListView.SWIPE_ACTION_CHOICE) {
                     swapChoiceState(downPosition);
                 }
@@ -963,9 +990,19 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
      */
     public void move(float deltaX) {
         swipeListView.onMove(downPosition, deltaX);
-        float posX = ViewHelper.getX(frontView);
+        float posX;
+        if (swipeActionMode == SWIPE_ACTION_MODE_MOVE) {
+          posX = ViewHelper.getX(frontView);
+        } else {
+          posX = ViewHelper.getX(backView);
+        }
+
         if (opened.get(downPosition)) {
-            posX += openedRight.get(downPosition) ? -viewWidth + rightOffset : viewWidth - leftOffset;
+            if (swipeActionMode == SWIPE_ACTION_MODE_MOVE) {
+              posX += openedRight.get(downPosition) ? -viewWidth + rightOffset : viewWidth - leftOffset;
+            } else {
+              posX += openedRight.get(downPosition) ? 0 + rightOffset : -viewWidth - leftOffset;
+            }
         }
         if (posX > 0 && !swipingRight) {
             if(SwipeListView.DEBUG){
@@ -1003,11 +1040,11 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
                 setTranslationX(frontView, deltaX);
             }
         } else {
-            setTranslationX(frontView, deltaX);
+            setTranslationX(getViewForSwipeActionMode(), deltaX);
         }
     }
 
-    /**
+  /**
      * Class that saves pending dismiss data
      */
     class PendingDismissData implements Comparable<PendingDismissData> {
@@ -1135,4 +1172,7 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
         }
     }
 
+    private View getViewForSwipeActionMode() {
+      return swipeActionMode == SWIPE_ACTION_MODE_MOVE ? frontView : backView;
+    }
 }

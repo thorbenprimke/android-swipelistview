@@ -44,6 +44,10 @@
         </attr>
         <attr name="swipeDrawableChecked" format="reference"/>
         <attr name="swipeDrawableUnchecked" format="reference"/>
+        <attr name="swipeActionMode" format="enum">
+            <enum name="move" value="0"/>
+            <enum name="over" value="1"/>
+        </attr>
     </declare-styleable>
 
 </resources>
