@@ -212,7 +212,7 @@ public class SwipeListView extends ListView {
             swipeDrawableUnchecked = styled.getResourceId(R.styleable.SwipeListView_swipeDrawableUnchecked, 0);
             swipeFrontView = styled.getResourceId(R.styleable.SwipeListView_swipeFrontView, 0);
             swipeBackView = styled.getResourceId(R.styleable.SwipeListView_swipeBackView, 0);
-            swipeActionMode = styled.getResourceId(R.styleable.SwipeListView_swipeActionMode, SWIPE_ACTION_MODE_MOVE);
+            swipeActionMode = styled.getInt(R.styleable.SwipeListView_swipeActionMode, SWIPE_ACTION_MODE_MOVE);
             styled.recycle();
         }
 

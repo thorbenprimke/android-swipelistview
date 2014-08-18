@@ -750,7 +750,7 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
             int end = swipeListView.getLastVisiblePosition();
             for (int i = start; i <= end; i++) {
                 if (opened.get(i)) {
-                    closeAnimate(swipeListView.getChildAt(i - start).findViewById(swipeFrontView), i);
+                    closeAnimate(swipeListView.getChildAt(i - start).findViewById(getViewIdForSwipeActionMode()), i);
                 }
             }
         }
@@ -809,7 +809,9 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
                             if (backView.getVisibility() == View.GONE) {
                               backView.setVisibility(View.VISIBLE);
                             }
-                            if (swipeActionMode == SWIPE_ACTION_MODE_OVER) {
+                            if (swipeActionMode == SWIPE_ACTION_MODE_OVER &&
+                                !opened.get(downPosition) &&
+                                backView.getTranslationX() == 0) {
                               setTranslationX(backView, -viewWidth);
                             }
                         }
@@ -949,6 +951,9 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
                 if (swiping && downPosition != ListView.INVALID_POSITION) {
                     if (opened.get(downPosition)) {
                         deltaX += openedRight.get(downPosition) ? viewWidth - rightOffset : -viewWidth + leftOffset;
+                    }
+                    if (swipeActionMode == SWIPE_ACTION_MODE_OVER) {
+                      deltaX = -viewWidth + deltaX;
                     }
                     move(deltaX);
                     return true;
@@ -1174,5 +1179,9 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
 
     private View getViewForSwipeActionMode() {
       return swipeActionMode == SWIPE_ACTION_MODE_MOVE ? frontView : backView;
+    }
+
+    private int getViewIdForSwipeActionMode() {
+      return swipeActionMode == SWIPE_ACTION_MODE_MOVE ? swipeFrontView : swipeBackView;
     }
 }
