@@ -431,17 +431,9 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
      *
      * @param frontView view to re-draw
      */
-    protected void reloadSwipeStateInView(View frontView, int position) {
-        if (!opened.get(position)) {
-            setTranslationX(frontView, 0.0f);
-        } else {
-            if (openedRight.get(position)) {
-                setTranslationX(frontView, swipeListView.getWidth());
-            } else {
-                setTranslationX(frontView, -swipeListView.getWidth());
-            }
-        }
-
+    protected void reloadSwipeStateInView(View convertView, int position) {
+      View view = convertView.findViewById(getViewIdForSwipeActionMode());
+      setTranslationX(view, getPositionForSwipeViewBasedOnMode(position));
     }
 
     /**
@@ -1183,5 +1175,26 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
 
     private int getViewIdForSwipeActionMode() {
       return swipeActionMode == SWIPE_ACTION_MODE_MOVE ? swipeFrontView : swipeBackView;
+    }
+
+    private int getPositionForSwipeViewBasedOnMode(int location) {
+      if (swipeActionMode == SWIPE_ACTION_MODE_OVER) {
+        if (!opened.get(location)) {
+          return -swipeListView.getWidth();
+        } else {
+          return 0;
+        }
+      } else {
+        if (!opened.get(location)) {
+          return 0;
+        } else {
+          if (openedRight.get(location)) {
+            return swipeListView.getWidth();
+          } else {
+            return -swipeListView.getWidth();
+          }
+        }
+
+      }
     }
 }

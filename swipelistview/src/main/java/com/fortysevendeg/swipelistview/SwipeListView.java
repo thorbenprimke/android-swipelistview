@@ -253,7 +253,7 @@ public class SwipeListView extends ListView {
      */
     public void recycle(View convertView, int position) {
         touchListener.reloadChoiceStateInView(convertView.findViewById(swipeFrontView), position);
-        touchListener.reloadSwipeStateInView(convertView.findViewById(swipeFrontView), position);
+        touchListener.reloadSwipeStateInView(convertView, position);
 
         // Clean pressed state (if dismiss is fire from a cell, to this cell, with a press drawable, in a swipelistview
         // when this cell will be recycle it will still have his pressed state. This ensure the pressed state is
